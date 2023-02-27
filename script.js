@@ -7,6 +7,8 @@ const expenseDes = document.getElementById("expendesc");
 const expenseCat = document.getElementById("cate");
 let arr = [];
 
+getLocalStorage();
+
 // Form submit event
 form.addEventListener("submit", addItem);
 // Delete event
@@ -50,7 +52,7 @@ function addItem(e) {
     li.appendChild(editBtn);
     // Append li to list
     expenses.appendChild(li);
-    // arr = JSON.parse(localStorage.getItem("expenses"));
+
     arr.push({
       id: expenseid,
       expenseAmt: expenseAmt.value,
@@ -72,19 +74,11 @@ function removeItem(e) {
       const identity = li.id;
       expenseList.removeChild(li);
 
-      let removeVal;
-      for (let i = 0; i < arr.length; i++) {
-        if (arr[i].id == identity) {
-          removeVal = arr[i];
-          break;
-        }
-      }
-      let arr2 = [];
-      for (let i = 0; i < arr.length; i++) {
-        if (arr[i].id === removeVal.id) continue;
-        else arr2.push(arr[i]);
-      }
-      localStorage.setItem("expenses", JSON.stringify(arr2));
+      const newData = JSON.parse(localStorage.getItem("expenses")).filter(
+        (data) => data.id != identity
+      );
+
+      localStorage.setItem("expenses", JSON.stringify(newData));
     }
   }
 }
@@ -95,21 +89,13 @@ function editItem(e) {
     const identity = li.id;
     expenseList.removeChild(li);
 
-    const arr = JSON.parse(localStorage.getItem("expenses"));
+    const newData = JSON.parse(localStorage.getItem("expenses")).filter(
+      (data) => data.id != identity
+    );
 
-    let removeVal;
-    for (let i = 0; i < arr.length; i++) {
-      if (arr[i].id == identity) {
-        removeVal = arr[i];
-        break;
-      }
-    }
-    let arr2 = [];
-    for (let i = 0; i < arr.length; i++) {
-      if (arr[i].id === removeVal.id) continue;
-      else arr2.push(arr[i]);
-    }
-    localStorage.setItem("expenses", JSON.stringify(arr2));
+    localStorage.setItem("expenses", JSON.stringify(newData));
+
+    localStorage.setItem("expenses", JSON.stringify(newData));
     expenseAmt.value = e.target.parentElement.childNodes[0].data.replace(
       "Rs.",
       ""
@@ -120,4 +106,42 @@ function editItem(e) {
     );
     expenseCat.value = e.target.parentElement.childNodes[3].data;
   }
+}
+
+function getLocalStorage() {
+  const data = JSON.parse(localStorage.getItem("expenses"));
+
+  if (!data) return;
+  arr = data;
+  arr.forEach((obj) => {
+    const li = document.createElement("li");
+    // Add class
+    li.className = "list-group-item";
+    li.id = obj.id;
+    // Add text node with input value
+    li.appendChild(document.createTextNode("Rs." + obj.expenseAmt));
+    li.appendChild(document.createTextNode(" " + ": "));
+    li.appendChild(document.createTextNode(obj.expenseDescription + " : "));
+    li.appendChild(document.createTextNode(obj.expenseType));
+    // Create del button element
+    const deleteBtn = document.createElement("button");
+
+    // Add classes to del button
+    deleteBtn.className = "btn btn-danger btn-sm float-right delete";
+
+    // Append text node
+    deleteBtn.appendChild(document.createTextNode("Delete "));
+
+    // Append button to li
+    li.appendChild(deleteBtn);
+
+    const editBtn = document.createElement("button");
+    editBtn.className = "btn btn-primary btn-sm float-right edit";
+    editBtn.appendChild(document.createTextNode("Edit"));
+
+    //Append edit button to li
+    li.appendChild(editBtn);
+    // Append li to list
+    expenses.appendChild(li);
+  });
 }
