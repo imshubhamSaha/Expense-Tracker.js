@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css"
+      integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <script defer src="script.js"></script>
+    <title>Expense Tracker</title>
+  </head>
+  <body>
+    <header id="main-header" class="bg-success text-white p-4 mb-3">
+      <h1 id="header-title">Expense Tracker</h1>
+    </header>
+    <div class="container">
+      <div id="main" class="card card-body">
+        <h2 class="title">Add Expenses</h2>
+        <div class="msg"></div>
+        <form id="addForm" class="form">
+          <label for="expenseamt">Choose Expense Amount:</label>
+          <input
+            type="number"
+            class="form-control"
+            id="expenamt"
+            placeholder="Enter money"
+          />
+          <label for="expensedesc">Choose Description:</label>
+          <input
+            type="text"
+            class="form-control"
+            id="expendesc"
+            placeholder="Expense type"
+          />
+          <label for="expensecat">Choose Category:</label>
+          <select name="cate" id="cate" class="form-control">
+            <option value="fuel">Fuel</option>
+            <option value="food">Food</option>
+            <option value="electricity">Electricity</option>
+            <option value="movie">Movie</option>
+          </select>
+          <br />
+          <input type="submit" class="btn btn-dark" value="Add Expense" />
+        </form>
+        <br />
+        <h2 class="title">Expenses</h2>
+        <ul id="expenses" class="list-group"></ul>
+      </div>
+    </div>
+  </body>
+</html>
