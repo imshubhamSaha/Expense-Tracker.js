@@ -227,6 +227,7 @@ const searchExpense = function (e) {
   const text = e.target.value.toLowerCase().trim();
 
   if (!expenses.childElementCount) {
+    errormsg("You don't have any saved data", "d-none", "alert-warning");
     return;
   }
 
@@ -236,8 +237,14 @@ const searchExpense = function (e) {
     (item) => item.childNodes[3].data.trim().toLowerCase().indexOf(text) !== -1
   );
 
-  if (data.length === 0) expensesContainer.classList.add("d-none");
-  else expensesContainer.classList.remove("d-none");
+  if (data.length === 0) {
+    expensesContainer.classList.add("d-none");
+    errormsg(
+      `You don't have any saved data with letter ${text}`,
+      "d-none",
+      "alert-warning"
+    );
+  } else expensesContainer.classList.remove("d-none");
 
   items.forEach((item) => {
     const itemVal = item.childNodes[3].data.trim();
