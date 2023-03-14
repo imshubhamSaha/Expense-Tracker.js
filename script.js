@@ -1,147 +1,254 @@
 const form = document.querySelector("#addForm");
-const expenses = document.getElementById("expenses");
-const expenseList = document.getElementById("expenses");
-const msg = document.querySelector(".msg");
-const expenseAmt = document.getElementById("expenamt");
-const expenseDes = document.getElementById("expendesc");
-const expenseCat = document.getElementById("cate");
-let arr = [];
+const message = document.querySelector("#displayAlert");
+const expenses = document.querySelector("#expenses");
+const expenseList = document.querySelector("#expenses");
+const expenseAmt = document.querySelector("#expenseamt");
+const expenseDes = document.querySelector("#expensedesc");
+const expenseCat = document.querySelector("#expensetype");
+const expensesContainer = document.querySelector("#expensesCard");
+const formContainer = document.querySelector("#mainCard");
+const expenseFilter = document.querySelector("#expenseSearch");
 
-getLocalStorage();
+//Helper Class to manage edit state
+class State {
+  static state = "";
+  static userID = "";
 
-// Form submit event
-form.addEventListener("submit", addItem);
-// Delete event
-expenseList.addEventListener("click", removeItem);
-expenseList.addEventListener("click", editItem);
+  static stateUpdate(key) {
+    State.state = key;
+  }
 
-function addItem(e) {
-  e.preventDefault();
-  let expenseid = Date.now();
-  if (expenseAmt.value <= 0 || expenseDes.value === "") {
-    msg.classList.add("error");
-    msg.innerHTML = "Please enter description field and Amount greater than 0";
-    setTimeout(() => msg.remove(), 3000);
-  } else {
-    const li = document.createElement("li");
-    // Add class
-    li.className = "list-group-item";
-    li.id = `${expenseid}`;
-    // Add text node with input value
-    li.appendChild(document.createTextNode("Rs." + expenseAmt.value));
-    li.appendChild(document.createTextNode(" " + ": "));
-    li.appendChild(document.createTextNode(expenseDes.value + " : "));
-    li.appendChild(document.createTextNode(expenseCat.value));
-    // Create del button element
-    const deleteBtn = document.createElement("button");
+  static userIDUpdate(id) {
+    State.userID = id;
+  }
+}
 
-    // Add classes to del button
-    deleteBtn.className = "btn btn-danger btn-sm float-right delete";
+//Functions
+////Helper functions
+// Message
+const errormsg = function (msg, clremove, cladd) {
+  message.innerHTML = `${msg}`;
+  message.classList.remove(clremove);
+  message.classList.add(cladd);
+  setTimeout(() => {
+    message.classList.add(clremove);
+    message.classList.remove(cladd);
+  }, 2000);
+};
 
-    // Append text node
-    deleteBtn.appendChild(document.createTextNode("Delete "));
+///Access Localstore
+const storeData = function (obj) {
+  const localData = JSON.parse(localStorage.getItem("expenses"));
+  localData.push(obj);
+  localStorage.setItem("expenses", JSON.stringify(localData));
+};
 
-    // Append button to li
-    li.appendChild(deleteBtn);
+//ShowonUi
+const ShowOnUi = function (obj) {
+  const li = document.createElement("li");
+  li.id = obj.id;
+  // Add class
+  li.className = "list-group-item";
+  li.appendChild(document.createTextNode("Rs." + obj.money));
+  li.appendChild(document.createTextNode(" " + ": "));
+  li.appendChild(document.createTextNode(obj.expDescription + " : "));
+  li.appendChild(document.createTextNode(obj.expType));
 
-    const editBtn = document.createElement("button");
-    editBtn.className = "btn btn-primary btn-sm float-right edit";
-    editBtn.appendChild(document.createTextNode("Edit"));
+  //delbutton element
+  const deleteBtn = document.createElement("button");
+  deleteBtn.className = "btn btn-outline-danger btn-sm float-end delete";
+  deleteBtn.appendChild(document.createTextNode("Delete"));
+  li.appendChild(deleteBtn);
+  //editbutton element
+  const editBtn = document.createElement("button");
+  editBtn.className = "btn btn-outline-primary btn-sm  float-end edit me-1";
+  editBtn.appendChild(document.createTextNode("Edit"));
+  li.appendChild(editBtn);
 
-    //Append edit button to li
-    li.appendChild(editBtn);
-    // Append li to list
-    expenses.appendChild(li);
+  // Append li to list
+  expenses.appendChild(li);
+};
 
-    arr.push({
-      id: expenseid,
-      expenseAmt: expenseAmt.value,
-      expenseDescription: expenseDes.value,
-      expenseType: expenseCat.value,
+//localStorage set
+const initialised = function () {
+  State.stateUpdate("POST");
+  if (!localStorage.getItem("expenses"))
+    localStorage.setItem("expenses", JSON.stringify([]));
+  else {
+    const localData = JSON.parse(localStorage.getItem("expenses"));
+    if (!localData.length) return;
+
+    localData.forEach((item) => {
+      ShowOnUi(item);
     });
-    localStorage.setItem("expenses", JSON.stringify(arr));
+    expensesContainer.classList.remove("d-none");
+    errormsg("Your Data displayed in UI", "d-none", "alert-primary");
+  }
+};
+
+//Delete from localStorage
+const deleteFromLocal = function (id) {
+  const updatedData = JSON.parse(localStorage.getItem("expenses")).filter(
+    (item) => item.id != id
+  );
+  localStorage.setItem("expenses", JSON.stringify(updatedData));
+};
+
+//Utility
+const util = function (obj) {
+  if (obj.money <= 0) {
+    errormsg("Please enter amount greater than 0", "d-none", "alert-danger");
+    return true;
+  } else if (obj.expDescription === "") {
+    errormsg("Please enter description field", "d-none", "alert-danger");
+    return true;
+  }
+};
+
+// Adding new Data
+const newData = function (obj) {
+  if (util(obj)) return;
+
+  ShowOnUi(obj);
+
+  if (expenses.childElementCount === 1) {
+    expensesContainer.classList.remove("d-none");
+  }
+
+  // store in local storage
+  storeData(obj);
+
+  expenseAmt.value = "";
+  expenseDes.value = "";
+  expenseCat.value = "fuel";
+
+  //Alert
+  errormsg("Your Expense added successfully", "d-none", "alert-success");
+};
+
+//updating edited data
+const updateEditedData = function (obj) {
+  if (util(obj)) return;
+
+  async function asyncCall() {
+    const editData = JSON.parse(localStorage.getItem("expenses"));
+    for (const item of editData) {
+      if (item.id == obj.id) {
+        item.money = obj.money;
+        item.expDescription = obj.expDescription;
+        item.expType = obj.expType;
+      }
+    }
+
+    localStorage.setItem("expenses", JSON.stringify(editData));
+
+    ShowOnUi(obj);
+
+    if (expenses.childElementCount === 1) {
+      expensesContainer.classList.remove("d-none");
+    }
+
     expenseAmt.value = "";
     expenseDes.value = "";
     expenseCat.value = "fuel";
-  }
-}
 
-// Remove item
-function removeItem(e) {
+    //Alert
+    errormsg("Your Response Updated Successfully", "d-none", "alert-success");
+    State.stateUpdate("POST");
+    State.userIDUpdate("");
+  }
+  asyncCall();
+};
+
+///Callback Functions
+//Add Expense
+const onSubmit = function (e) {
+  e.preventDefault();
+
+  const userData = {
+    id: State.state === "POST" ? Date.now() : State.userID,
+    money: expenseAmt.value,
+    expDescription: expenseDes.value,
+    expType: expenseCat.value,
+  };
+
+  if (State.state === "POST") newData(userData);
+  else if (State.state === "PUT") updateEditedData(userData);
+};
+
+// Remove Expense
+const removeItem = function (e) {
   if (e.target.classList.contains("delete")) {
     if (confirm("Are You Sure?")) {
       const li = e.target.parentElement;
-      const identity = li.id;
       expenseList.removeChild(li);
-
-      const newData = JSON.parse(localStorage.getItem("expenses")).filter(
-        (data) => data.id != identity
-      );
-
-      localStorage.setItem("expenses", JSON.stringify(newData));
+      if (expenses.childElementCount === 0) {
+        expensesContainer.classList.add("d-none");
+      }
+      //Deleting data from local
+      deleteFromLocal(li.id);
     }
   }
-}
+};
 
-function editItem(e) {
+//Edit Expense
+const editItem = function (e) {
   if (e.target.classList.contains("edit")) {
+    State.stateUpdate("PUT");
+
     const li = e.target.parentElement;
-    const identity = li.id;
+    const editData = {
+      id: li.id,
+      money: e.target.parentElement.childNodes[0].data.replace("Rs.", ""),
+      expDescription: e.target.parentElement.childNodes[2].data.replace(
+        ":",
+        ""
+      ),
+      expType: e.target.parentElement.childNodes[3].data,
+    };
+
     expenseList.removeChild(li);
 
-    const newData = JSON.parse(localStorage.getItem("expenses")).filter(
-      (data) => data.id != identity
-    );
+    if (expenses.childElementCount === 0) {
+      expensesContainer.classList.add("d-none");
+    }
 
-    localStorage.setItem("expenses", JSON.stringify(newData));
+    expenseAmt.value = editData.money;
+    expenseDes.value = editData.expDescription;
+    expenseCat.value = editData.expType;
 
-    localStorage.setItem("expenses", JSON.stringify(newData));
-    expenseAmt.value = e.target.parentElement.childNodes[0].data.replace(
-      "Rs.",
-      ""
-    );
-    expenseDes.value = e.target.parentElement.childNodes[2].data.replace(
-      ":",
-      ""
-    );
-    expenseCat.value = e.target.parentElement.childNodes[3].data;
+    //update state storage
+    State.userIDUpdate(editData.id);
   }
-}
+};
 
-function getLocalStorage() {
-  const data = JSON.parse(localStorage.getItem("expenses"));
+// search Expense
+const searchExpense = function (e) {
+  const text = e.target.value.toLowerCase().trim();
 
-  if (!data) return;
-  arr = data;
-  arr.forEach((obj) => {
-    const li = document.createElement("li");
-    // Add class
-    li.className = "list-group-item";
-    li.id = obj.id;
-    // Add text node with input value
-    li.appendChild(document.createTextNode("Rs." + obj.expenseAmt));
-    li.appendChild(document.createTextNode(" " + ": "));
-    li.appendChild(document.createTextNode(obj.expenseDescription + " : "));
-    li.appendChild(document.createTextNode(obj.expenseType));
-    // Create del button element
-    const deleteBtn = document.createElement("button");
+  if (!expenses.childElementCount) {
+    return;
+  }
 
-    // Add classes to del button
-    deleteBtn.className = "btn btn-danger btn-sm float-right delete";
+  const items = [...expenseList.childNodes];
 
-    // Append text node
-    deleteBtn.appendChild(document.createTextNode("Delete "));
+  const data = items.filter(
+    (item) => item.childNodes[3].data.trim().toLowerCase().indexOf(text) !== -1
+  );
 
-    // Append button to li
-    li.appendChild(deleteBtn);
+  if (data.length === 0) expensesContainer.classList.add("d-none");
+  else expensesContainer.classList.remove("d-none");
 
-    const editBtn = document.createElement("button");
-    editBtn.className = "btn btn-primary btn-sm float-right edit";
-    editBtn.appendChild(document.createTextNode("Edit"));
-
-    //Append edit button to li
-    li.appendChild(editBtn);
-    // Append li to list
-    expenses.appendChild(li);
+  items.forEach((item) => {
+    const itemVal = item.childNodes[3].data.trim();
+    if (itemVal.toLowerCase().indexOf(text) == -1) item.classList.add("d-none");
+    else item.classList.remove("d-none");
   });
-}
+};
+
+//event Handlers
+form.addEventListener("submit", onSubmit);
+expenseList.addEventListener("click", removeItem);
+expenseList.addEventListener("click", editItem);
+expenseFilter.addEventListener("keyup", searchExpense);
+window.addEventListener("DOMContentLoaded", initialised);
