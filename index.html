@@ -16,86 +16,64 @@
       integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
       crossorigin="anonymous"
     ></script>
+    <script
+      defer
+      src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.3.4/axios.min.js"
+    ></script>
     <script defer src="script.js"></script>
   </head>
-  <body>
-    <header class="p-3 text-bg-dark">
-      <div class="container-fluid">
-        <div
-          class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start"
-        >
-          <a
-            class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none"
-          >
-            <h3>Expense Tracker</h3>
-          </a>
-          <ul
-            class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0"
-          ></ul>
-
-          <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" role="search">
-            <input
-              type="search"
-              id="expenseSearch"
-              class="form-control form-control-dark text-bg-white"
-              placeholder="Search expense type..."
-              aria-label="Search"
-            />
-          </form>
-
-          <div class="text-end">
-            <button
-              type="button"
-              class="btn btn-outline-success me-2"
-              data-bs-toggle="modal"
-              data-bs-target="#loginModal"
-            >
-              Login
-            </button>
-            <button
-              type="button"
-              class="btn btn-outline-warning"
-              data-bs-toggle="modal"
-              data-bs-target="#signupModal"
-            >
-              Sign-up
-            </button>
-          </div>
-        </div>
-      </div>
+  <body class="bg-warning-subtle">
+    <header>
+      <nav
+        class="navbar navbar-dark bg-dark p-3"
+        style="background-color: #e3f2fd"
+      >
+        <a class="navbar-brand" href="#">
+          <img
+            src="images/expenselogo.png"
+            width="45"
+            height="35"
+            class="d-inline-block align-top"
+            alt="logo"
+          />
+          <strong class="p-2">Expense Tracker</strong>
+        </a>
+        <form class="form-inline w-auto">
+          <input
+            class="form-control mr-sm-2"
+            type="search"
+            id="expenseSearch"
+            placeholder="Search expenses..."
+            aria-label="Search"
+          />
+        </form>
+      </nav>
     </header>
     <main>
       <div class="container mt-3">
         <div
           id="mainCard"
-          class="card my-2 border border-primary-subtle rounded"
+          class="card my-2 border-primary-subtle rounded-3 bg-warning-subtle"
         >
           <div class="card-body">
-            <h4 class="card-title text-center text-black-50 m-1">
-              Add Expenses
-            </h4>
+            <h4 class="card-title text-center text-black-50">Add Expense</h4>
             <div
               id="displayAlert"
-              class="alert border-1 m-0 d-none"
+              class="alert border-1 mb-2 d-none"
               role="alert"
             ></div>
-            <form id="addForm" class="row">
-              <div class="col-md-12">
-                <label for="expenseamt" class="form-label"
-                  >Choose Expense Amount :</label
-                >
+            <form id="addForm">
+              <div class="form-floating mb-2">
                 <input
                   type="number"
                   class="form-control border-1 border-dark-subtle rounded"
                   id="expenseamt"
                   value=""
-                  placeholder="Enter money"
+                  placeholder="money..."
                 />
+                <label for="expenseamt"> Enter Expense Amount </label>
               </div>
-              <div class="col-md-12">
-                <label for="expensedesc" class="form-label mt-2"
-                  >Choose Description :</label
-                >
+              <div class="form-floating mb-2">
                 <input
                   type="text"
                   class="form-control border-1 border-dark-subtle rounded"
@@ -103,24 +81,49 @@
                   value=""
                   placeholder="Expense Description"
                 />
+                <label for="expensedesc">Add Comments </label>
               </div>
-
-              <div class="col-md-12">
-                <label for="expensetype" class="form-label mt-2"
-                  >Choose Category :</label
-                >
-                <select
-                  class="form-select border-1 border-dark-subtle rounded"
-                  id="expensetype"
-                >
-                  <option selected value="fuel">Fuel</option>
-                  <option value="food">Food</option>
-                  <option value="electricity">Electricity</option>
-                  <option value="movie">Movie</option>
-                </select>
+              <div class="row g-2">
+                <div class="col-md">
+                  <div class="form-floating">
+                    <select
+                      class="form-select border-1 border-dark-subtle rounded"
+                      id="expensetype"
+                    >
+                      <option selected value="Card">Card</option>
+                      <option value="Cash">Cash</option>
+                      <option value="Others">Others</option>
+                    </select>
+                    <label for="expensetype">Expense Type</label>
+                  </div>
+                </div>
+                <div class="col-md">
+                  <div class="form-floating">
+                    <select
+                      class="form-select border-1 border-dark-subtle rounded"
+                      id="expenseCategory"
+                    >
+                      <option selected value="Grocery">Grocery</option>
+                      <option value="Fuel">Fuel</option>
+                      <option value="Entertainment">Entertainment</option>
+                      <option value="Essentials">Essentials</option>
+                      <option value="Health">Medical</option>
+                    </select>
+                    <label for="expenseCategory">Expense Category</label>
+                  </div>
+                </div>
               </div>
-
-              <div class="col-12">
+              <div class="form-floating mt-2">
+                <input
+                  type="date"
+                  class="form-control border-1 border-dark-subtle rounded"
+                  id="expensedate"
+                  value=""
+                  placeholder="Expense Date"
+                />
+                <label for="expensedate">Expense date </label>
+              </div>
+              <div class="d-grid gap-2 d-md-flex justify-content-md-center">
                 <button
                   id="expenseButton"
                   class="btn btn-outline-success mt-4 border-1"
@@ -135,261 +138,56 @@
       </div>
 
       <div id="expensesCard" class="container mt-3 d-none">
-        <!-- Content here -->
-        <div class="card mt-2 border border-primary-subtle rounded">
+        <div
+          class="card mt-2 border border-primary-subtle rounded bg-warning-subtle"
+        >
           <div class="card-body">
-            <h4 class="card-title text-black">Expenses :</h4>
+            <h4 class="card-title text-black text-center m-2">Expenses List</h4>
+            <div class="row g-2">
+              <div class="col-md">
+                <form class="form" id="filType">
+                  <label for="filtertype" class="px-1 mb-1"
+                    ><strong>Filter by type :</strong></label
+                  >
+                  <select
+                    class="form-select border-1 border-dark-subtle rounded"
+                    id="filtertype"
+                  >
+                    <option selected value="All">All</option>
+                    <option value="Card">Card</option>
+                    <option value="Cash">Cash</option>
+                    <option value="Others">Others</option>
+                  </select>
+                </form>
+              </div>
+              <div class="col-md">
+                <form class="form" id="filCategory">
+                  <label for="filterCategory" class="px-1 mb-1"
+                    ><strong>Filter by Category :</strong></label
+                  >
+                  <select
+                    class="form-select border-1 border-dark-subtle rounded"
+                    id="filterCategory"
+                  >
+                    <option selected value="NoChoice">No Choice</option>
+                    <option value="Grocery">Grocery</option>
+                    <option value="Fuel">Fuel</option>
+                    <option value="Entertainment">Entertainment</option>
+                    <option value="Essentials">Essentials</option>
+                    <option value="Health">Medical</option>
+                  </select>
+                </form>
+              </div>
+            </div>
+            <div
+              id="containerAlert"
+              class="alert border-1 mt-2 d-none"
+              role="alert"
+            ></div>
             <ul id="expenses" class="list-group mt-3 border-1"></ul>
           </div>
         </div>
       </div>
     </main>
-
-    <!-- Login Modal -->
-    <div class="modal" id="loginModal" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Login to your Account</h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
-          </div>
-          <div class="modal-body">
-            <form class="row g-3">
-              <div class="col-md-12">
-                <label for="validationServer110" class="form-label"
-                  >Login Id</label
-                >
-                <input
-                  type="email"
-                  class="form-control"
-                  id="validationServer110"
-                  placeholder="enter your email/Username"
-                  value=""
-                  required
-                />
-              </div>
-              <div class="col-md-12">
-                <label for="validationServer111" class="form-label"
-                  >Password</label
-                >
-                <input
-                  type="password"
-                  class="form-control"
-                  id="validationServer111"
-                  placeholder="Type your password"
-                  value=""
-                  required
-                />
-              </div>
-
-              <div class="col-12">
-                <div class="form-check">
-                  <input
-                    class="form-check-input"
-                    type="checkbox"
-                    value=""
-                    id="invalidCheck30"
-                    aria-describedby="invalidCheck3Feedback"
-                    required
-                  />
-                  <label class="form-check-label" for="invalidCheck30">
-                    Save your details
-                  </label>
-                  <!-- <div id="invalidCheck3Feedback" class="invalid-feedback">
-                    You must agree before submitting.
-                  </div> -->
-                </div>
-              </div>
-              <div class="col-12">
-                <button class="btn btn-primary" type="submit">Login</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Sign Up Modal -->
-    <div class="modal" id="signupModal" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Get your Personalised Account</h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
-          </div>
-          <div class="modal-body">
-            <form class="row g-3">
-              <div class="col-md-4">
-                <label for="validationServer01" class="form-label"
-                  >First name</label
-                >
-                <input
-                  type="text"
-                  class="form-control"
-                  id="validationServer01"
-                  placeholder="Enter FirstName"
-                  value=""
-                  required
-                />
-                <!-- <div class="valid-feedback">Looks good!</div> -->
-              </div>
-              <div class="col-md-4">
-                <label for="validationServer02" class="form-label"
-                  >Last name</label
-                >
-                <input
-                  type="text"
-                  class="form-control"
-                  id="validationServer02"
-                  placeholder="Enter LastName"
-                  value=""
-                  required
-                />
-                <!-- <div class="valid-feedback">Looks good!</div> -->
-              </div>
-              <div class="col-md-4">
-                <label for="validationServerUsername" class="form-label"
-                  >Username</label
-                >
-                <div class="input-group has-validation">
-                  <span class="input-group-text" id="inputGroupPrepend3"
-                    >@</span
-                  >
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="validationServerUsername"
-                    aria-describedby="inputGroupPrepend3 validationServerUsernameFeedback"
-                    required
-                  />
-                  <!-- <div
-                    id="validationServerUsernameFeedback"
-                    class="invalid-feedback"
-                  >
-                    Please choose a username.
-                  </div> -->
-                </div>
-              </div>
-              <div class="col-md-12">
-                <label for="validationServer100" class="form-label"
-                  >Email Address</label
-                >
-                <input
-                  type="email"
-                  class="form-control"
-                  id="validationServer100"
-                  placeholder="enter valid email"
-                  value=""
-                  required
-                />
-              </div>
-              <div class="col-md-6">
-                <label for="validationServer101" class="form-label"
-                  >Password</label
-                >
-                <input
-                  type="password"
-                  class="form-control"
-                  id="validationServer101"
-                  placeholder="Type a valid password"
-                  value=""
-                  required
-                />
-              </div>
-              <div class="col-md-6">
-                <label for="validationServer102" class="form-label"
-                  >Confirm password</label
-                >
-                <input
-                  type="email"
-                  class="form-control"
-                  id="validationServer102"
-                  placeholder="confirm password"
-                  value=""
-                  required
-                />
-              </div>
-
-              <div class="col-md-6">
-                <label for="validationServer03" class="form-label">City</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="validationServer03"
-                  aria-describedby="validationServer03Feedback"
-                  required
-                />
-                <!-- <div id="validationServer03Feedback" class="invalid-feedback">
-                  Please provide a valid city.
-                </div> -->
-              </div>
-              <div class="col-md-3">
-                <label for="validationServer04" class="form-label">State</label>
-                <select
-                  class="form-select"
-                  id="validationServer04"
-                  aria-describedby="validationServer04Feedback"
-                  required
-                >
-                  <option selected disabled value="">Choose...</option>
-                  <option>...</option>
-                </select>
-                <!-- <div id="validationServer04Feedback" class="invalid-feedback">
-                  Please select a valid state.
-                </div> -->
-              </div>
-              <div class="col-md-3">
-                <label for="validationServer05" class="form-label"
-                  >Zip Code</label
-                >
-                <input
-                  type="text"
-                  class="form-control"
-                  id="validationServer05"
-                  aria-describedby="validationServer05Feedback"
-                  required
-                />
-                <!-- <div id="validationServer05Feedback" class="invalid-feedback">
-                  Please provide a valid zip.
-                </div> -->
-              </div>
-              <div class="col-12">
-                <div class="form-check">
-                  <input
-                    class="form-check-input"
-                    type="checkbox"
-                    value=""
-                    id="invalidCheck3"
-                    aria-describedby="invalidCheck3Feedback"
-                    required
-                  />
-                  <label class="form-check-label" for="invalidCheck3">
-                    Agree to terms and conditions
-                  </label>
-                  <!-- <div id="invalidCheck3Feedback" class="invalid-feedback">
-                    You must agree before submitting.
-                  </div> -->
-                </div>
-              </div>
-              <div class="col-12">
-                <button class="btn btn-primary" type="submit">
-                  Create an Account
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
   </body>
 </html>
