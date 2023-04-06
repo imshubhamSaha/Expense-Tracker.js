@@ -1,21 +1,24 @@
 "use strict";
-const form = document.querySelector("#addForm");
-const message = document.querySelector("#displayAlert");
-const expenseList = document.querySelector("#expenses");
-const expenseAmt = document.querySelector("#expenseamt");
-const expenseComment = document.querySelector("#expensedesc");
-const expenseType = document.querySelector("#expensetype");
-const expenseCategory = document.querySelector("#expenseCategory");
-const expenseDate = document.querySelector("#expensedate");
-const expensesContainer = document.querySelector("#expensesCard");
-const formContainer = document.querySelector("#mainCard");
-const expenseComFilter = document.querySelector("#expenseSearch");
-const filterByType = document.querySelector("#filtertype");
-const filterByCategory = document.querySelector("#filterCategory");
-const filterCatform = document.querySelector("#filCategory");
-const filterTypeform = document.querySelector("#filType");
-const searchMsgDiv = document.querySelector("#containerAlert");
+const $ = (query) => document.querySelector(query);
 
+const form = $("#addForm");
+const message = $("#displayAlert");
+const expenseList = $("#expenses");
+const expenseAmt = $("#expenseamt");
+const expenseComment = $("#expensedesc");
+const expenseType = $("#expensetype");
+const expenseCategory = $("#expenseCategory");
+const expenseDate = $("#expensedate");
+const expensesContainer = $("#expensesCard");
+const formContainer = $("#mainCard");
+const expenseComFilter = $("#expenseSearch");
+const filterByType = $("#filtertype");
+const filterByCategory = $("#filterCategory");
+const filterCatform = $("#filCategory");
+const filterTypeform = $("#filType");
+const searchMsgDiv = $("#containerAlert");
+const key = "userData";
+const URL = `https://crudcrud.com/api/e9e88ab4fb63471098dc7e76764f906f/${key}`;
 /////////////////////////////////////////Functions////////////////////////////////////////////////
 ///////////////////////////Utility functions//////////////////////////////
 //Helper Obj to manage edit state
@@ -28,6 +31,32 @@ const stateObj = {
 const setState = function (state, id = "") {
   stateObj.stateName = state;
   stateObj._id = id;
+};
+
+//Get request
+const getRequest = () => axios.get(`${URL}`);
+
+//POST request
+const postRequest = (load) => axios.post(`${URL}`, load);
+
+//PUT request
+const putRequest = (id, load) => axios.put(`${URL}/${id}`, load);
+
+//Delete request
+const deleteRequest = (id) => axios.delete(`${URL}/${id}`);
+
+//Create local
+const createLocal = function (userArr) {
+  localStorage.setItem(key, JSON.stringify({ data: userArr }));
+};
+
+//acces Local storage
+const accessLocal = (keyName) => {
+  return new Promise((resolve) => {
+    const localMemory = localStorage.getItem(keyName);
+    if (!localMemory) resolve(null);
+    else resolve(JSON.parse(localMemory));
+  });
 };
 
 // Message
@@ -76,7 +105,6 @@ const util = function (formData) {
 //ShowonUi
 const ShowOnUi = function (userData) {
   const li = document.createElement("li");
-
   li.className = "list-group-item";
   li.classList.add("mb-2");
   li.classList.add("border-1");
@@ -113,14 +141,31 @@ const defaultFormData = function (data) {
 };
 
 /// Initial for every loading
-const init = function () {
+const init = async function (key) {
   setState("POST");
-  const local = localStorage.getItem("userData");
-  if (!local || JSON.parse(local).length === 0) return;
-
-  JSON.parse(local).forEach((item) => ShowOnUi(item));
-  displayContainer("remove");
-  errormsg("Database  Data are displayed in UI", "d-none", "alert-primary");
+  try {
+    const Msg = "you don't have any save data";
+    const local = await accessLocal(key);
+    if (local) {
+      if (local.data.length === 0) throw new Error(Msg);
+      else {
+        local.data.forEach((item) => ShowOnUi(item));
+      }
+    } else {
+      const dataBase = await getRequest();
+      if (dataBase.data.length === 0) {
+        createLocal(dataBase.data);
+        throw new Error(Msg);
+      } else {
+        createLocal(dataBase.data);
+        dataBase.data.forEach((item) => ShowOnUi(item));
+      }
+    }
+    displayContainer("remove");
+    errormsg("Database Data are displayed in UI", "d-none", "alert-primary");
+  } catch (error) {
+    errormsg(error, "d-none", "alert-danger");
+  }
 };
 
 //to update UI
@@ -137,47 +182,54 @@ const updateUI = function (arr, set) {
   removeSearchMsg("d-none");
 };
 
-//Set localStorage Data
-const setLocalStore = function ({ ...data }) {
-  data._id = Date.now();
-  if (!localStorage.getItem("userData")) {
-    localStorage.setItem("userData", JSON.stringify([data]));
-  } else {
-    const localdata = JSON.parse(localStorage.getItem("userData"));
-    localdata.push(data);
-    localStorage.setItem("userData", JSON.stringify(localdata));
-  }
-  ShowOnUi(data);
+//update LocalStorage
+const updateLocal = function (userObj) {
+  const { data } = JSON.parse(localStorage.getItem(key));
+  data.push(userObj);
+  createLocal(data);
+  ShowOnUi(userObj);
   if (expensesContainer.childElementCount === 1) displayContainer("remove");
   defaultFormData();
   errormsg("Data Added in Database", "d-none", "alert-primary");
 };
 
 //Edit localStorage DAta
-const editLocalStorage = function ({ ...data }) {
-  data._id = stateObj._id;
-
-  const localData = JSON.parse(localStorage.getItem("userData")).filter(
-    (item) => item._id !== data._id
+const editLocalStorage = function (userdata) {
+  const localData = JSON.parse(localStorage.getItem(key)).data.filter(
+    (item) => item._id !== userdata._id
   );
-  localData.push(data);
+  localData.push(userdata);
+  createLocal(localData);
+};
 
-  localStorage.setItem("userData", JSON.stringify(localData));
-  ShowOnUi(data);
-  defaultFormData();
-  setState("POST");
-  errormsg("Data updated in the Database", "d-none", "alert-primary");
+//Update dataBase
+const updateDatabase = async function ({ ...userData }) {
+  try {
+    await putRequest(stateObj._id, userData);
+    userData._id = stateObj._id;
+    editLocalStorage(userData);
+    ShowOnUi(userData);
+    if (expensesContainer.childElementCount === 1) displayContainer("remove");
+    defaultFormData();
+    setState("POST");
+    errormsg("Data updated in the Database", "d-none", "alert-primary");
+  } catch (error) {
+    setState("POST");
+    errormsg(
+      "Error in updating Data : Please reload Page to get your previous data",
+      "d-none",
+      "alert-danger"
+    );
+    defaultFormData();
+  }
 };
 
 //Remove LocalStorage Data
 const removeFromLocal = function (li) {
-  const filterData = JSON.parse(localStorage.getItem("userData")).filter(
+  const filterData = JSON.parse(localStorage.getItem(key)).data.filter(
     (data) => data._id !== li._id
   );
-  localStorage.setItem("userData", JSON.stringify(filterData));
-  expenseList.removeChild(li);
-  if (expenseList.childElementCount === 0) displayContainer("add");
-  errormsg("Data Deleted From Database", "d-none", "alert-danger");
+  createLocal(filterData);
 };
 
 //FilteredData
@@ -192,14 +244,29 @@ const filterData = function (val, index, totalData) {
 
 //////////////////////////CallBack Functions for event callback function ///////////////////////////
 // Adding new data
-const addNewData = function (userData) {
+const addNewData = async function (userData) {
   if (util(userData)) return;
-  setLocalStore(userData);
+  try {
+    const response = await postRequest(userData);
+    updateLocal(response.data);
+  } catch (error) {
+    errormsg("Error: Your data is not added", "d-none", "alert-danger");
+  }
 };
 
 // Removing Existing Data
-const removeData = function (li) {
-  if (confirm("Are you Sure?")) removeFromLocal(li);
+const removeData = async function (li) {
+  if (confirm("Are you Sure?")) {
+    try {
+      await deleteRequest(li._id);
+      removeFromLocal(li);
+      expenseList.removeChild(li);
+      if (expenseList.childElementCount === 0) displayContainer("add");
+      errormsg("Data Deleted From Database", "d-none", "alert-danger");
+    } catch (error) {
+      errormsg("Error: Data not deleted", "d-none", "alert-primary");
+    }
+  }
 };
 
 //Editing existing Data
@@ -220,7 +287,6 @@ const editData = function (li) {
   };
 
   defaultFormData(editData);
-
   errormsg(
     "Your Previous Data will persist in Database untill you again submits",
     "d-none",
@@ -301,7 +367,7 @@ const formSubmit = function (e) {
     expensetype: expenseType.value,
   };
   if (stateObj.stateName === "POST") addNewData(userData);
-  else if (stateObj.stateName === "PUT") editLocalStorage(userData);
+  else if (stateObj.stateName === "PUT") updateDatabase(userData);
 };
 
 // Data(comment) matches Search
@@ -338,7 +404,7 @@ const universalBtn = function (e) {
 //eventListener
 form.addEventListener("submit", formSubmit);
 expenseList.addEventListener("click", universalBtn);
-window.addEventListener("DOMContentLoaded", init);
+window.addEventListener("DOMContentLoaded", init.bind(undefined, key));
 expenseComFilter.addEventListener("keyup", searchComment);
 filterByType.addEventListener("change", filterType);
 filterByCategory.addEventListener("change", filterCategory);
