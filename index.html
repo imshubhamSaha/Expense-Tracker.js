@@ -25,7 +25,7 @@
   <body class="bg-warning-subtle">
     <header>
       <nav
-        class="navbar navbar-dark bg-dark p-3"
+        class="navbar navbar-dark bg-dark p-3 d-flex align-items-center justify-content-lg-between justify-content-center"
         style="background-color: #e3f2fd"
       >
         <a class="navbar-brand" href="#">
@@ -38,7 +38,9 @@
           />
           <strong class="p-2">Expense Tracker</strong>
         </a>
-        <form class="form-inline w-auto">
+        <form
+          class="form-inline w-auto justify-content-lg-end justify-content-center"
+        >
           <input
             class="form-control mr-sm-2"
             type="search"
@@ -62,7 +64,7 @@
               class="alert border-1 mb-2 d-none"
               role="alert"
             ></div>
-            <form id="addForm">
+            <form class="" id="addForm">
               <div class="form-floating mb-2">
                 <input
                   type="number"
@@ -107,7 +109,7 @@
                       <option value="Fuel">Fuel</option>
                       <option value="Entertainment">Entertainment</option>
                       <option value="Essentials">Essentials</option>
-                      <option value="Health">Medical</option>
+                      <option value="Medical">Medical</option>
                     </select>
                     <label for="expenseCategory">Expense Category</label>
                   </div>
